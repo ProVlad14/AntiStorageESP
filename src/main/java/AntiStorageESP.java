@@ -3,6 +3,7 @@ import com.github.retrooper.packetevents.event.PacketListenerAbstract;
 import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerBlockEntityData;
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -30,10 +31,10 @@ public final class AntiStorageESP extends JavaPlugin {
                     if (player == null) return;
 
                     if (event.getPacketType() == PacketType.Play.Server.BLOCK_ENTITY_DATA) {
-                        // Safe, generic extraction of block position components from standard PacketEvents 2.x structure
                         try {
-                            com.github.retrooper.packetevents.util.Vector3i vec = 
-                                (com.github.retrooper.packetevents.util.Vector3i) event.getPacketValue(0);
+                            // Correct wrapper instancing for PacketEvents 2.x
+                            WrapperPlayServerBlockEntityData wrapper = new WrapperPlayServerBlockEntityData(event);
+                            com.github.retrooper.packetevents.util.Vector3i vec = wrapper.getBlockPosition();
                             
                             if (vec != null) {
                                 Location playerLoc = player.getLocation();
@@ -44,7 +45,6 @@ public final class AntiStorageESP extends JavaPlugin {
                                 }
                             }
                         } catch (Exception ignored) {
-                            // Prevent any server lag or crashes if a packet structure shifts
                         }
                     }
                 }
