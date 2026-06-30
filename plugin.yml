@@ -1,0 +1,7 @@
+name: AntiStorageESP
+version: 1.0
+main: com.example.antistorageesp.AntiStorageESP
+api-version: '1.21'
+depend: [packetevents]
+author: Gemini
+description: Lightweight Anti-Storage ESP for Folia.
