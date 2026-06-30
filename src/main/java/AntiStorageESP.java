@@ -30,25 +30,21 @@ public final class AntiStorageESP extends JavaPlugin {
                     if (player == null) return;
 
                     if (event.getPacketType() == PacketType.Play.Server.BLOCK_ENTITY_DATA) {
+                        // Safe, generic extraction of block position components from standard PacketEvents 2.x structure
                         try {
-                            // Read the block position directly from the packet's internal byte stream buffer
-                            event.getByteBuf().markReaderIndex();
-                            long encodedPos = event.getByteBuf().readLong();
-                            event.getByteBuf().resetReaderIndex();
-
-                            // Decode standard Minecraft packed block coordinates
-                            int x = (int) (encodedPos >> 38);
-                            int y = (int) ((encodedPos << 52) >> 52);
-                            int z = (int) ((encodedPos << 26) >> 38);
+                            com.github.retrooper.packetevents.util.Vector3i vec = 
+                                (com.github.retrooper.packetevents.util.Vector3i) event.getPacketValue(0);
                             
-                            Location playerLoc = player.getLocation();
-                            double distSq = playerLoc.distanceSquared(new Location(player.getWorld(), x, y, z));
-                            
-                            if (distSq > maxEspDistanceSquared) {
-                                event.setCancelled(true);
+                            if (vec != null) {
+                                Location playerLoc = player.getLocation();
+                                double distSq = playerLoc.distanceSquared(new Location(player.getWorld(), vec.getX(), vec.getY(), vec.getZ()));
+                                
+                                if (distSq > maxEspDistanceSquared) {
+                                    event.setCancelled(true);
+                                }
                             }
                         } catch (Exception ignored) {
-                            // Safe fallback if buffer state manipulation errors out
+                            // Prevent any server lag or crashes if a packet structure shifts
                         }
                     }
                 }
