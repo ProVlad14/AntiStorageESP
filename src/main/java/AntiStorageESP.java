@@ -32,9 +32,9 @@ public final class AntiStorageESP extends JavaPlugin {
 
                     if (event.getPacketType() == PacketType.Play.Server.BLOCK_ENTITY_DATA) {
                         try {
-                            // Correct wrapper instancing for PacketEvents 2.x
                             WrapperPlayServerBlockEntityData wrapper = new WrapperPlayServerBlockEntityData(event);
-                            com.github.retrooper.packetevents.util.Vector3i vec = wrapper.getBlockPosition();
+                            // Fixed: 2.7.0 uses getPosition() instead of getBlockPosition()
+                            com.github.retrooper.packetevents.util.Vector3i vec = wrapper.getPosition();
                             
                             if (vec != null) {
                                 Location playerLoc = player.getLocation();
