@@ -3,7 +3,6 @@ import com.github.retrooper.packetevents.event.PacketListenerAbstract;
 import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerBlockEntityData;
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -31,16 +30,25 @@ public final class AntiStorageESP extends JavaPlugin {
                     if (player == null) return;
 
                     if (event.getPacketType() == PacketType.Play.Server.BLOCK_ENTITY_DATA) {
-                        WrapperPlayServerBlockEntityData packet = new WrapperPlayServerBlockEntityData(event);
-                        
-                        // Using standard 2.x cross-platform compatible location fetcher
-                        com.github.retrooper.packetevents.util.Vector3i vec = packet.getBlockPosition();
-                        
-                        Location playerLoc = player.getLocation();
-                        double distSq = playerLoc.distanceSquared(new Location(player.getWorld(), vec.getX(), vec.getY(), vec.getZ()));
-                        
-                        if (distSq > maxEspDistanceSquared) {
-                            event.setCancelled(true);
+                        try {
+                            // Read the block position directly from the packet's internal byte stream buffer
+                            event.getByteBuf().markReaderIndex();
+                            long encodedPos = event.getByteBuf().readLong();
+                            event.getByteBuf().resetReaderIndex();
+
+                            // Decode standard Minecraft packed block coordinates
+                            int x = (int) (encodedPos >> 38);
+                            int y = (int) ((encodedPos << 52) >> 52);
+                            int z = (int) ((encodedPos << 26) >> 38);
+                            
+                            Location playerLoc = player.getLocation();
+                            double distSq = playerLoc.distanceSquared(new Location(player.getWorld(), x, y, z));
+                            
+                            if (distSq > maxEspDistanceSquared) {
+                                event.setCancelled(true);
+                            }
+                        } catch (Exception ignored) {
+                            // Safe fallback if buffer state manipulation errors out
                         }
                     }
                 }
