@@ -1,7 +1,7 @@
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import com.github.retrooper.packetevents.event.SimplePacketListenerAbstract;
-import com.github.retrooper.packetevents.event.impl.packetsend.PacketPlaySendEvent;
+import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerBlockEntityData;
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
@@ -24,7 +24,7 @@ public final class AntiStorageESP extends JavaPlugin {
         PacketEvents.getAPI().getEventManager().registerListener(
             new SimplePacketListenerAbstract(PacketListenerPriority.NORMAL) {
                 @Override
-                public void onPacketPlaySend(PacketPlaySendEvent event) {
+                public void onPacketSend(PacketSendEvent event) {
                     Player player = (Player) event.getPlayer();
                     if (player == null) return;
 
